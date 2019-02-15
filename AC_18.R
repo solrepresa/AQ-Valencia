@@ -9,6 +9,7 @@ library(GISTools)
 library(lubridate)
 
 
+## Objetivo: Generar base de FIRE
 
 ## 1)  Abrir files
 fs <- list.files(path="C:\\Users\\narep\\Desktop\\SOL\\aire_comunitat\\variables\\FIRE", pattern = ".shp", full.names = TRUE)

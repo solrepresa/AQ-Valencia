@@ -6,8 +6,6 @@
 
 ### Objetivo: Trabajar con NDVI
 
-# AC_5.R y AC_6.R como base
-
 
 library(rgdal)
 library(raster)
@@ -18,7 +16,7 @@ library(maptools)
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # 
 
-#### 1 - Calidad + factor escala + Recorte   ####
+#### 1 - Calidad + Recorte   ####
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # 
 
