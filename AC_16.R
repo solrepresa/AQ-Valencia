@@ -25,7 +25,7 @@ library(maptools)
 
 ### ATENCION
 #  Este codigo tira error cuando en el .hdf hay solo una SDS
-#  en ese caso utilziar el código que está más abajo :)
+#  en ese caso utilizar el código que está más abajo :)
 
 
 setwd("C:\\Users\\narep\\Desktop\\SOL\\aire_comunitat\\MERRA") #fundamental paa q funcione gdal!
@@ -72,7 +72,7 @@ for( i in 1: length(id)){
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
 
-## VERSION 2
+## VERSION 2  >> cuando solo hay 1 SDS   ####
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
 
@@ -110,6 +110,39 @@ for( i in 1: length(id)){
   rm(data_recorte, MIRRAraster)
 
 }
+
+
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+
+## RESEAMPLING  ####
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+
+# Lista de raster SDS MERRA
+id_MERRA <- dir("C:\\Users\\narep\\Desktop\\SOL\\aire_comunitat\\variables\\MERRA\\raster", pattern = ".tif")
+
+
+# Uso imagen MODIS MCD19A2 como modelo para crear raster
+MCD19A2 <- raster("C:\\Users\\narep\\Desktop\\SOL\\aire_comunitat\\MODIS\\crop_res\\MCD19A2.A2008-01-01.h17v04.tif")
+
+raster_template <- raster(nrows = 239, ncols = 158, #100m de resolucion aprox
+                          crs = "+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0 ", 
+                          ext = extent(MCD19A2))  # toma las extensiones
+
+
+
+for( i in 1:length(id_MERRA)){
+  rst <- raster(paste("C:\\Users\\narep\\Desktop\\SOL\\aire_comunitat\\variables\\MERRA\\raster\\", id_MERRA[i], sep = ""))
+  rst_resampling <- raster::resample(rst, raster_template)
+  writeRaster(data_resampling, paste("C:\\Users\\narep\\Desktop\\SOL\\aire_comunitat\\variables\\MERRA\\raster_res\\", id_MERRA[i], sep = ""), format = "GTiff")
+  
+}
+
+
+
+
+
 
 
 

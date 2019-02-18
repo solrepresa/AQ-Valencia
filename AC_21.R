@@ -21,7 +21,7 @@ library(raster)
 
 MCD19A2 <- raster("C:\\Users\\narep\\Desktop\\SOL\\aire_comunitat\\MODIS\\crop_res\\MCD19A2.A2008-01-01.h17v04.tif")
 
-raster_template <- raster(nrows = 239/3, ncols = 158/3,
+raster_template <- raster(nrows = 239*10, ncols = 158*10,
                           crs = "+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0 ", 
                           ext = extent(MCD19A2))  # toma las extensiones
 

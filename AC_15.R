@@ -4,7 +4,7 @@
 ### Archivo 15
 
 
-### Objetivo: Trabajar con NDVI
+### Objetivo: Trabajar con NDVI de MOD13A3
 
 
 library(rgdal)
@@ -16,14 +16,20 @@ library(maptools)
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # 
 
-#### 1 - Calidad + Recorte   ####
+#### 1 - Calidad + Recorte  + Reproyeccion + Resampling ####
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # 
+
+# Uso imagen MODIS MCD19A2 como modelo para crear raster
+MCD19A2 <- raster("C:\\Users\\narep\\Desktop\\SOL\\aire_comunitat\\MODIS\\crop_res\\MCD19A2.A2008-01-01.h17v04.tif")
+
+raster_template <- raster(nrows = 239, ncols = 158, #100m de resolucion aprox
+                          crs = "+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0 ", 
+                          ext = extent(MCD19A2))  # toma las extensiones
 
 
 id_aq <- dir("C:\\Users\\narep\\Desktop\\SOL\\aire_comunitat\\variables\\NDVI\\quality", pattern = ".tif") # atencion q no haya .tif.xml en la carpeta..
 id <- dir("C:\\Users\\narep\\Desktop\\SOL\\aire_comunitat\\variables\\NDVI\\raster", pattern = ".tif")
-
 
 
 ## Cambiar sistema de referencia del shape
@@ -35,7 +41,7 @@ shape_trans <- spTransform(shape, CRS("+proj=sinu +lon_0=0 +x_0=0 +y_0=0 +datum=
 for (i in 1:length(id_aq)){
   # 1) Abrir imagen calidad de NDVI
   raster_aq <- raster(paste("C:\\Users\\narep\\Desktop\\SOL\\aire_comunitat\\variables\\NDVI\\quality\\", id_aq[i], sep = ""))
-  
+
   #range(raster_aq[raster_aq]) #ver rango de valores
   
   # 1) Crear mascara
@@ -61,12 +67,18 @@ for (i in 1:length(id_aq)){
   # 4)Recortar
   data_recorte <- crop(MODISraster, shape_trans)  #recorto imagen para Valencia
   
-  # 4) Guardar
-  writeRaster(data_recorte, paste("C:\\Users\\narep\\Desktop\\SOL\\aire_comunitat\\variables\\NDVI\\crop_res\\", id[i], sep = ""), format = "GTiff")
-  rm(data_recorte, raster_aq, MODISraster)
+  # 5) Reproyectar
+  data_recorte  <- projectRaster(data_recorte , 
+                                 crs ="+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0",
+                                 method = "bilinear")
+  
+  # 6) Resampling
+  data_resampling <- raster::resample(data_recorte, raster_template)
+  
+  # 7) Guardar
+  writeRaster(data_resampling, paste("C:\\Users\\narep\\Desktop\\SOL\\aire_comunitat\\variables\\NDVI\\crop_res\\", id[i], sep = ""), format = "GTiff")
+  rm(data_recorte, data_resampling, raster_aq, MODISraster)
 }
-
-
 
 
 
