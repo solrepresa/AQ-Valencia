@@ -28,7 +28,7 @@ library(maptools)
 #  en ese caso utilizar el código que está más abajo :)
 
 
-setwd("C:\\Users\\narep\\Desktop\\SOL\\aire_comunitat\\MERRA") #fundamental paa q funcione gdal!
+setwd("C:\\Users\\narep\\Desktop\\SOL\\aire_comunitat\\variables\\MERRA") #fundamental paa q funcione gdal!
 id <- dir(pattern = ".hdf") 
 
 
@@ -61,7 +61,7 @@ for( i in 1: length(id)){
     data_recorte <- crop(MIRRAraster, shape_trans)  #recorto imagen para Valencia
     
     # 4) Guardar
-    writeRaster(data_recorte, paste("C:\\Users\\narep\\Desktop\\SOL\\aire_comunitat\\MERRA\\raster\\", filename, sep = ""), format = "GTiff")
+    writeRaster(data_recorte, paste("C:\\Users\\narep\\Desktop\\SOL\\aire_comunitat\\variables\\MERRA\\raster\\", filename, sep = ""), format = "GTiff")
     rm(data_recorte, MIRRAraster)
     
   }
@@ -79,7 +79,7 @@ for( i in 1: length(id)){
 ### CUando en el .hdf solo tiene una unica SDS
 
 
-setwd("C:\\Users\\narep\\Desktop\\SOL\\aire_comunitat\\MERRA") #fundamental paa q funcione gdal!
+setwd("C:\\Users\\narep\\Desktop\\SOL\\aire_comunitat\\variables\\MERRA\\otros\\a") #fundamental paa q funcione gdal!
 id <- dir(pattern = ".hdf") 
 
 
@@ -88,7 +88,7 @@ id <- dir(pattern = ".hdf")
 shape <- readOGR("C:\\Users\\narep\\Desktop\\SOL\\AQ-Valencia\\mapa\\valencia.shp")
 shape_trans <- spTransform(shape, CRS("+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0 "))
 
-SDS = "PRECTOT"
+SDS = "H1000"
 
 for( i in 1: length(id)){
   # 1) Abrir
@@ -106,7 +106,7 @@ for( i in 1: length(id)){
   data_recorte <- crop(MIRRAraster, shape_trans)  #recorto imagen para Valencia
   
   # 4) Guardar
-  writeRaster(data_recorte, paste("C:\\Users\\narep\\Desktop\\SOL\\aire_comunitat\\MERRA\\raster\\", filename, sep = ""), format = "GTiff")
+  writeRaster(data_recorte, paste("C:\\Users\\narep\\Desktop\\SOL\\aire_comunitat\\variables\\MERRA\\raster\\", filename, sep = ""), format = "GTiff")
   rm(data_recorte, MIRRAraster)
 
 }
@@ -126,7 +126,7 @@ id_MERRA <- dir("C:\\Users\\narep\\Desktop\\SOL\\aire_comunitat\\variables\\MERR
 # Uso imagen MODIS MCD19A2 como modelo para crear raster
 MCD19A2 <- raster("C:\\Users\\narep\\Desktop\\SOL\\aire_comunitat\\MODIS\\crop_res\\MCD19A2.A2008-01-01.h17v04.tif")
 
-raster_template <- raster(nrows = 239, ncols = 158, #100m de resolucion aprox
+raster_template <- raster(nrows = 239, ncols = 158, #1 km de resolucion aprox
                           crs = "+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0 ", 
                           ext = extent(MCD19A2))  # toma las extensiones
 
@@ -135,7 +135,7 @@ raster_template <- raster(nrows = 239, ncols = 158, #100m de resolucion aprox
 for( i in 1:length(id_MERRA)){
   rst <- raster(paste("C:\\Users\\narep\\Desktop\\SOL\\aire_comunitat\\variables\\MERRA\\raster\\", id_MERRA[i], sep = ""))
   rst_resampling <- raster::resample(rst, raster_template)
-  writeRaster(data_resampling, paste("C:\\Users\\narep\\Desktop\\SOL\\aire_comunitat\\variables\\MERRA\\raster_res\\", id_MERRA[i], sep = ""), format = "GTiff")
+  writeRaster(rst_resampling, paste("C:\\Users\\narep\\Desktop\\SOL\\aire_comunitat\\variables\\MERRA\\raster_res\\", id_MERRA[i], sep = ""), format = "GTiff")
   
 }
 
