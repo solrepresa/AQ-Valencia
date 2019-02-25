@@ -35,7 +35,7 @@ id <- dir("C:\\Users\\narep\\Desktop\\SOL\\aire_comunitat\\variables\\NDVI\\rast
 ## Cambiar sistema de referencia del shape
 
 shape <- readOGR("C:\\Users\\narep\\Desktop\\SOL\\AQ-Valencia\\mapa\\valencia.shp")
-shape_trans <- spTransform(shape, CRS("+proj=sinu +lon_0=0 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs +ellps=WGS84 +towgs84=0,0,0"))
+shape_trans <- spTransform(shape, CRS("+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0"))
 
 
 for (i in 1:length(id_aq)){
@@ -61,22 +61,28 @@ for (i in 1:length(id_aq)){
   # plot(MODISraster)
   
   # 3) Aplicar máscara
-  salida <- mask(MODISraster, raster_aq)
+  MODISraster <- mask(MODISraster, raster_aq)
   # plot(salida)
   
-  # 4)Recortar
-  data_recorte <- crop(MODISraster, shape_trans)  #recorto imagen para Valencia
+  # 4)Recortar para no reproyectar todo el mapa
+  MODISraster <- crop(MODISraster, extent(-140000, 80000, 4100000 , 4600000 ))  #recorto imagen para Valencia
   
-  # 5) Reproyectar
-  data_recorte  <- projectRaster(data_recorte , 
+  
+  # 5) Reproyectar 
+  MODISraster  <- projectRaster(MODISraster, 
                                  crs ="+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0",
                                  method = "bilinear")
   
-  # 6) Resampling
+  # 4) Recortar
+  data_recorte <- crop(MODISraster, shape_trans)  #recorto imagen para Valencia
+  
+   # 6) Resampling
   data_resampling <- raster::resample(data_recorte, raster_template)
   
   # 7) Guardar
-  writeRaster(data_resampling, paste("C:\\Users\\narep\\Desktop\\SOL\\aire_comunitat\\variables\\NDVI\\crop_res\\", id[i], sep = ""), format = "GTiff")
+  writeRaster(data_resampling, paste("C:\\Users\\narep\\Desktop\\SOL\\aire_comunitat\\variables\\NDVI\\crop_res\\", id[i], sep = ""), 
+              format = "GTiff", 
+              overwrite = TRUE)
   rm(data_recorte, data_resampling, raster_aq, MODISraster)
 }
 
