@@ -117,7 +117,8 @@ variables_modelo[[3]] <- NDVI_ds
 rm(NDVI_ds, NDVI_i, NDVI_raster, ds, date)
 
 
-# 4) MERRA
+# 4) MERRA ####
+
 MERRA_i <- dir("C:\\Users\\narep\\Desktop\\SOL\\aire_comunitat\\variables\\MERRA\\raster", pattern = ".tif")
 
 
@@ -142,7 +143,7 @@ variables_modelo[[4]] <- MERRA_ds
 rm(MERRA_ds, MERRA_raster, ds, MERRA_i)
 
 
-## 5) FIRE
+## 5) FIRE ####
 
 fire_i <- dir("C:\\Users\\narep\\Desktop\\SOL\\aire_comunitat\\variables\\FIRE\\diario", pattern = ".tif")
 
