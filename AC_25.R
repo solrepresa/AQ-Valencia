@@ -90,7 +90,8 @@ ggplot(miss_data, aes(x = fecha, y = value)) +
   theme_bw() + ylab("") + 
   scale_y_continuous(breaks =  c(0, 1)) + 
   theme(axis.text.y = element_text(colour="white")) +
-  facet_wrap(~variable)
+  facet_wrap(~variable) + 
+  ggtitle("Datos procesados")
 
 
 
@@ -107,10 +108,13 @@ a$value = 1
 
 ggplot(a, aes( x = fecha, y = value)) + geom_point() +
   theme(axis.text.y = element_text(colour="white")) +
-  facet_wrap(~variable)
+  facet_wrap(~variable) + 
+  ggtitle("Datos que faltan")
 
 
 
+
+prueba <- a %>% filter( variable == "inst3_3d_asm_Nv")
 
 
 # # # # # # # # # # # # # # # # # # # # # # # # #
@@ -118,7 +122,7 @@ ggplot(a, aes( x = fecha, y = value)) + geom_point() +
 # Variables de interes de MERRA
 
 SDS <- vector( mode = "list", length = 5)
-names(SDS) <- c("tavg1_2d_aer_Nx", "tavg1_2d_slv_Nx", "tavg1_2d_flx_Nx", "avg1_2d_rad_Nx", "inst3_3d_asm_Np" )
+names(SDS) <- c("tavg1_2d_aer_Nx", "tavg1_2d_slv_Nx", "tavg1_2d_flx_Nx", "avg1_2d_rad_Nx", "inst3_3d_asm_Np") #"inst3_3d_asm_Nv"
 
 SDS[[1]] <- c("BCSMASS", "DMSSMASS", "DUSMASS", "DUSMASS25", "OCSMASS", "SO2SMASS", "SO4SMASS", "SSSMASS", "SSSMASS25")
 SDS[[2]] <- "H1000" 
