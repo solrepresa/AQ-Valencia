@@ -42,8 +42,9 @@ CLC_df$CODE_12 <- as.numeric(levels(CLC_df$CODE_12))[CLC_df$CODE_12]
 
 CLC_df[which(CLC_df$CODE_12 < 200), 4] <- 1 #"Artificial"
 CLC_df[which(CLC_df$CODE_12 > 200 & CLC_df$CODE_12 <300), 4] <- 2 #"Agricola"
-CLC_df[which(CLC_df$CODE_12 > 300 & CLC_df$CODE_12 <400), 4] <- 3 #"Humedales"
-CLC_df[which(CLC_df$CODE_12 > 400), 4] <- 4 #"Agua"
+CLC_df[which(CLC_df$CODE_12 > 300 & CLC_df$CODE_12 <400), 4] <- 3 #"Forestal"
+CLC_df[which(CLC_df$CODE_12 > 400 & CLC_df$CODE_12 <500), 4] <- 4 #"Humedales"
+CLC_df[which(CLC_df$CODE_12 > 500), 4] <- 5 #"Agua"
 
 names(CLC_df)[4] <- "Clase"
 
@@ -65,7 +66,7 @@ raster_template <- raster(nrows = 239*10, ncols = 158*10,
                           ext = extent(MCD19A2))  # toma las extensiones
 
 
-for( i in 1:4){
+for( i in 4:5){
   CLC_clase <- CLC[ CLC$Clase == i,] 
   CLC_clase <- spTransform(CLC_clase, CRS("+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0"))
   
@@ -86,6 +87,7 @@ for( i in 1:4){
   
   
   # 7) Guardar
-  writeRaster(r_focal, file = paste("C:\\Users\\narep\\Desktop\\SOL\\aire_comunitat\\variables\\CLC\\CLC_", i, ".tif", sep=""), format= "GTiff")
+  writeRaster(r_focal, file = paste("C:\\Users\\narep\\Desktop\\SOL\\aire_comunitat\\variables\\CLC\\CLC_", i, ".tif", sep=""), 
+              format= "GTiff", overwrite = TRUE )
   
 }
