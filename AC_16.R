@@ -51,7 +51,7 @@ raster_template <- raster(nrows = 239, ncols = 158, #1 km de resolucion aprox
 
 
 sds_error <- list() # junto file que dan error
-
+k=1 
 mapply(file = id,
        FUN = function(file){
          tryCatch(
@@ -88,7 +88,7 @@ mapply(file = id,
            error = function(error_message){
              message("Posible error en get_subdatasets(). Esto ocurre cuando hay solo 1 SDS")
              message(error_message)
-             sds_error[[k]] <- file
+             sds_error[k] <- file
              k = k + 1
            }
          )
