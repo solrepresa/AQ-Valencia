@@ -47,12 +47,12 @@ plot(mosaico)
 
 
 ## Shape
-shape <- readOGR("C:\\Users\\narep\\Desktop\\SOL\\AQ-Valencia\\mapa\\valencia.shp")
-shape_trans <- spTransform(shape, CRS("+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0"))
+shape <- readShapePoly("C:\\Users\\narep\\Desktop\\SOL\\aire_comunitat\\mapa\\valencia_4326.shp",
+                       proj4string = CRS(crs_project))
 
 
 # Recortar
-data_recorte <- crop(mosaico, shape_trans)  #recorto imagen para Valencia
+data_recorte <- crop(mosaico, shape)  #recorto imagen para Valencia
 
 
 # Resampling >> Uso imagen MODIS MCD19A2 como modelo para crear raster

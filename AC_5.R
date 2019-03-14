@@ -1,8 +1,7 @@
 ###  Calidad del Aire en Valencia
-###  04/02/2019 Valencia, Espa?a
+###  04/02/2019 Valencia, Spain - Modificado 12/03/2019
 ###  Sol Represa
 ###  Archivo 5
-
 
 
 ## Objetivo:
@@ -46,6 +45,9 @@ library(reshape2)
 
 setwd("C:\\Users\\narep\\Desktop\\SOL\\aire_valencia")
 
+# La proeyccion del proyecto:
+crs_project = "+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0"
+
 
 # # # # # # # # # # # # # # # # # # # # # # # # #
 
@@ -56,6 +58,8 @@ setwd("C:\\Users\\narep\\Desktop\\SOL\\aire_valencia")
 
 id <- dir("C:\\Users\\narep\\Desktop\\SOL\\aire_comunitat\\MODIS\\quality", pattern = ".tif") # atencion q no haya .tif.xml en la carpeta..
 shape <- readShapePoly("C:\\Users\\narep\\Desktop\\SOL\\AQ-Valencia\\mapa\\valencia.shp")
+proj4string(shape) <- CRS("+proj=utm +zone=30 +ellps=GRS80 +units=m +no_defs ") # EPSG:3042 
+shape <- spTransform(shape, CRS(crs_project))
 
 
 for (i in 1:length(id)){
@@ -66,7 +70,10 @@ for (i in 1:length(id)){
   MODISraster <- raster(paste("C:\\Users\\narep\\Desktop\\SOL\\aire_comunitat\\MODIS\\quality\\", id[i], sep = ""))
   if (tryCatch(!is.null(crop(MODISraster,shape)), error=function(e) return(FALSE))){ # cuando no hay superposicion, no corre
     data_recorte <- crop(MODISraster, shape)  #recorto imagen para Valencia
-    writeRaster(data_recorte, filename = archivo_name) # Guardo imagen
+    writeRaster(data_recorte, 
+                format = "GTiff",
+                filename = archivo_name, 
+                overwrite = TRUE) # Guardo imagen
     print(i)
   }
 }
@@ -91,7 +98,10 @@ for (i in 1:length(fs)){
                         substring(fs[i],54,83), sep="")   #seteo nombre de guardado
   crop <- raster(fs[i], values=TRUE)
   crop_cal <- (0.84927256*(crop)) + 0.01178339   #calibracion (ver AC_3_bis.R)
-  writeRaster(crop_cal, filename = archivo_name) # Guardo imagen
+  writeRaster(crop_cal, 
+              filename = archivo_name, 
+              format = "GTiff",
+              overwrite = TRUE) # Guardo imagen
   print(i)
 }
 
@@ -139,7 +149,7 @@ e <- extent(c(xmin = xmin,
               xmax = xmax, 
               ymin = ymin, 
               ymax = ymax))  # extension donde entren todas las imagenes
-s <- raster(e, nrows = nrow, ncols = ncol, crs= "+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0") #raster con 3 veces resolucion
+s <- raster(e, nrows = nrow, ncols = ncol, crs= crs_project ) #raster con 3 veces resolucion
 
 
 for (i in 1:length(fs)){
@@ -148,7 +158,10 @@ for (i in 1:length(fs)){
   crop <- raster(fs[i], values=TRUE)
   if(!all(is.na(crop[]))){
     r1<- resample(crop, s, method = "ngb")
-    writeRaster(r1, filename = archivo_name) # Guardo imagen
+    writeRaster(r1, 
+                filename = archivo_name,
+                format = "GTiff",
+                overwrite = TRUE) # Guardo imagen
     print(i)
   }
 }

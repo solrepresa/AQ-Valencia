@@ -114,7 +114,7 @@ ggplot(a, aes( x = fecha, y = value)) + geom_point() +
 
 
 
-prueba <- a %>% filter( variable == "inst3_3d_asm_Nv")
+prueba <- a %>% filter( variable == "tavg1_2d_slv_Nx")
 
 
 # # # # # # # # # # # # # # # # # # # # # # # # #

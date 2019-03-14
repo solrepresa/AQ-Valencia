@@ -28,7 +28,7 @@ library(maptools)
 #  en ese caso utilizar el código que está más abajo :)
 
 
-setwd("C:\\Users\\narep\\Desktop\\MERRA") #fundamental para q funcione gdal!
+setwd("F:\\MERRA") #fundamental para q funcione gdal!
 #id <- dir(pattern = ".hdf") 
 
 id <- list.files(path = getwd(),
@@ -37,17 +37,18 @@ id <- list.files(path = getwd(),
 
 ## Shape recorte
 
-shape <- readOGR("C:\\Users\\narep\\Desktop\\SOL\\AQ-Valencia\\mapa\\valencia.shp")
-shape_trans <- spTransform(shape, CRS("+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0 "))
+shape <- readShapePoly("C:\\Users\\narep\\Desktop\\SOL\\aire_comunitat\\mapa\\valencia_4326.shp",
+                       proj4string = CRS(crs_project))
 
 
 # Para resampling
 # Uso imagen MODIS MCD19A2 como modelo para crear raster
-MCD19A2 <- raster("C:\\Users\\narep\\Desktop\\SOL\\aire_comunitat\\MODIS\\crop_res\\MCD19A2.A2008-01-01.h17v04.tif")
+MODIS <- raster("C:\\Users\\narep\\Desktop\\SOL\\aire_comunitat\\stack\\month\\raster_mes_1_max.tif")
 
-raster_template <- raster(nrows = 239, ncols = 158, #1 km de resolucion aprox
+
+raster_template <- raster(nrows = 239, ncols = 158, #100m de resolucion aprox
                           crs = "+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0 ", 
-                          ext = extent(MCD19A2))  # toma las extensiones
+                          ext = extent(MODIS))  # toma las extensiones
 
 
 sds_error <- list() # junto file que dan error
@@ -70,16 +71,20 @@ mapply(file = id,
                                             method = "bilinear")
                
                # 3)Recortar
-               data_recorte <- crop(MIRRAraster, shape_trans)  #recorto imagen para Valencia
+               data_recorte <- crop(MIRRAraster, shape)  #recorto imagen para Valencia
                
                # 4) Guardar recorte
-               writeRaster(data_recorte, paste(getwd(), "\\raster\\", filename, sep = ""), format = "GTiff")
+               writeRaster(data_recorte, paste(getwd(), "\\raster\\", filename, sep = ""), 
+                           format = "GTiff",
+                           overwrite = TRUE)
 
                # 5) Resampling
                rst_resampling <- raster::resample(data_recorte, raster_template)
                
                # 6) Guardar resampling
-               writeRaster(rst_resampling, paste(getwd(), "\\raster_res\\", filename, sep = ""), format = "GTiff")
+               writeRaster(rst_resampling, paste(getwd(), "\\raster_res\\", filename, sep = ""), 
+                           format = "GTiff",
+                           overwrite = TRUE)
 
                rm(data_recorte, MIRRAraster, rst_resampling)
              }
@@ -120,17 +125,18 @@ id <- list.files(path = getwd(),
 
 ## Shape recorte
 
-shape <- readOGR("C:\\Users\\narep\\Desktop\\SOL\\AQ-Valencia\\mapa\\valencia.shp")
-shape_trans <- spTransform(shape, CRS("+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0 "))
+shape <- readShapePoly("C:\\Users\\narep\\Desktop\\SOL\\aire_comunitat\\mapa\\valencia_4326.shp",
+                       proj4string = CRS(crs_project))
 
 
 # Para resampling
 # Uso imagen MODIS MCD19A2 como modelo para crear raster
-MCD19A2 <- raster("C:\\Users\\narep\\Desktop\\SOL\\aire_comunitat\\MODIS\\crop_res\\MCD19A2.A2008-01-01.h17v04.tif")
+MODIS <- raster("C:\\Users\\narep\\Desktop\\SOL\\aire_comunitat\\stack\\month\\raster_mes_1_max.tif")
 
-raster_template <- raster(nrows = 239, ncols = 158, #1 km de resolucion aprox
+
+raster_template <- raster(nrows = 239, ncols = 158, #100m de resolucion aprox
                           crs = "+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0 ", 
-                          ext = extent(MCD19A2))  # toma las extensiones
+                          ext = extent(MODIS))  # toma las extensiones
 
 
 SDS = "H1000"
@@ -152,16 +158,20 @@ mapply(file = id,
                                           method = "bilinear")
              
              # 3)Recortar
-             data_recorte <- crop(MIRRAraster, shape_trans)  #recorto imagen para Valencia
+             data_recorte <- crop(MIRRAraster, shape)  #recorto imagen para Valencia
              
              # 4) Guardar recorte
-             writeRaster(data_recorte, paste(getwd(), "\\raster\\", filename, sep = ""), format = "GTiff")
+             writeRaster(data_recorte, paste(getwd(), "\\raster\\", filename, sep = ""), 
+                         format = "GTiff",
+                         overwrite = TRUE)
              
              # 5) Resampling
              rst_resampling <- raster::resample(data_recorte, raster_template)
              
              # 6) Guardar resampling
-             writeRaster(rst_resampling, paste(getwd(), "\\raster_res\\", filename, sep = ""), format = "GTiff")
+             writeRaster(rst_resampling, paste(getwd(), "\\raster_res\\", filename, sep = ""), 
+                         format = "GTiff",
+                         overwrite = TRUE)
              
              rm(data_recorte, MIRRAraster, rst_resampling)
 

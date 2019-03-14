@@ -20,12 +20,16 @@ library(maptools)
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # 
 
-# Uso imagen MODIS MCD19A2 como modelo para crear raster
-MCD19A2 <- raster("C:\\Users\\narep\\Desktop\\SOL\\aire_comunitat\\MODIS\\crop_res\\MCD19A2.A2008-01-01.h17v04.tif")
+crs_project = "+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0"
+
+# Uso imagen del STACK de MODIS MCD19A2 como modelo para crear raster
+# tomo el stack porq tiene el tamaño que me interesa conservar
+
+MODIS <- raster("C:\\Users\\narep\\Desktop\\SOL\\aire_comunitat\\stack\\month\\raster_mes_1_max.tif")
 
 raster_template <- raster(nrows = 239, ncols = 158, #100m de resolucion aprox
-                          crs = "+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0 ", 
-                          ext = extent(MCD19A2))  # toma las extensiones
+                          crs = crs_project, 
+                          ext = extent(MODIS))  # toma las extensiones
 
 
 id_aq <- dir("C:\\Users\\narep\\Desktop\\SOL\\aire_comunitat\\variables\\NDVI\\quality", pattern = ".tif") # atencion q no haya .tif.xml en la carpeta..
@@ -35,7 +39,9 @@ id <- dir("C:\\Users\\narep\\Desktop\\SOL\\aire_comunitat\\variables\\NDVI\\rast
 ## Cambiar sistema de referencia del shape
 
 shape <- readOGR("C:\\Users\\narep\\Desktop\\SOL\\AQ-Valencia\\mapa\\valencia.shp")
-shape_trans <- spTransform(shape, CRS("+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0"))
+shape_trans <- spTransform(shape, CRS(crs_project))
+
+#shape_trans@bbox
 
 
 for (i in 1:length(id_aq)){
@@ -70,11 +76,11 @@ for (i in 1:length(id_aq)){
   
   # 5) Reproyectar 
   MODISraster  <- projectRaster(MODISraster, 
-                                 crs ="+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0",
+                                 crs = crs_project,
                                  method = "bilinear")
   
   # 4) Recortar
-  data_recorte <- crop(MODISraster, shape_trans)  #recorto imagen para Valencia
+  data_recorte <- crop(MODISraster, extent(-1.528134, 0.6885787, 37.845206, 37.845206))  #recorto imagen para Valencia
   
    # 6) Resampling
   data_resampling <- raster::resample(data_recorte, raster_template)
@@ -157,7 +163,7 @@ for (j in 1:12){
       k <- k + 1
     }
   }  
-  s <- brick(l)
+  s <- raster::brick(l)
   min_s <- min(s, na.rm=TRUE)  
   max_s <- max(s, na.rm=TRUE)
   median_s <- calc(s, fun = median, na.rm = TRUE)
