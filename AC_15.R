@@ -38,8 +38,8 @@ id <- dir("C:\\Users\\narep\\Desktop\\SOL\\aire_comunitat\\variables\\NDVI\\rast
 
 ## Cambiar sistema de referencia del shape
 
-shape <- readOGR("C:\\Users\\narep\\Desktop\\SOL\\AQ-Valencia\\mapa\\valencia.shp")
-shape_trans <- spTransform(shape, CRS(crs_project))
+shape <- readShapePoly("C:\\Users\\narep\\Desktop\\SOL\\aire_comunitat\\mapa\\valencia_4326.shp",
+                       proj4string = CRS(crs_project))
 
 #shape_trans@bbox
 
