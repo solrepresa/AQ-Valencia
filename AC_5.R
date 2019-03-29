@@ -17,14 +17,12 @@ library(maptools)
 library(rgdal)
 #library(gpclib)
 #library(spatstat)
-library(RGtk2)
-library(MODIStsp)
+#library(RGtk2)
+#library(MODIStsp)
 
 library(gdalUtils) 
 library(raster)
 library(MODIS)
-library(ggplot2)
-library(ggmap)
 
 library(lubridate)
 library(rgeos)
@@ -34,18 +32,10 @@ library(dplyr)
 library(lmtest)
 
 
-#library("rhdf5")
-library("raster")
-library("maptools")
-#library(RColorBrewer)
-library(reshape2)
-#library(ggplot2)
+dir = "/home/usuario/Sol/aire_comunitat/MODIS"
 
 
-
-setwd("C:\\Users\\narep\\Desktop\\SOL\\aire_valencia")
-
-# La proeyccion del proyecto:
+# La proyeccion del proyecto:
 crs_project = "+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0"
 
 
@@ -56,19 +46,18 @@ crs_project = "+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0"
 # # # # # # # # # # # # # # # # # # # # # # # # #
 
 
-id <- dir("C:\\Users\\narep\\Desktop\\SOL\\aire_comunitat\\MODIS\\quality", pattern = ".tif") # atencion q no haya .tif.xml en la carpeta..
-shape <- readShapePoly("C:\\Users\\narep\\Desktop\\SOL\\AQ-Valencia\\mapa\\valencia.shp")
-proj4string(shape) <- CRS("+proj=utm +zone=30 +ellps=GRS80 +units=m +no_defs ") # EPSG:3042 
-shape <- spTransform(shape, CRS(crs_project))
+id <- dir("/home/usuario/Sol/aire_comunitat/MODIS/quality", pattern = ".tif") # atencion q no haya .tif.xml en la carpeta..
+shape <- readShapePoly("/home/usuario/Sol/aire_comunitat/mapa/valencia_4326.shp",
+                       proj4string = CRS(crs_project))
 
 
 for (i in 1:length(id)){
   fecha <- paste(as.Date(paste(substring(id[i],14,16), substring(id[i],10,13)), '%j %Y'), 
-                 substring(id[i],18,23), sep=".")
-  archivo_name <- paste("C:\\Users\\narep\\Desktop\\SOL\\aire_comunitat\\MODIS\\crop\\", 
-                        substring(id[i],1,9),fecha, ".tif", sep="")  #seteo nombre de guardado
-  MODISraster <- raster(paste("C:\\Users\\narep\\Desktop\\SOL\\aire_comunitat\\MODIS\\quality\\", id[i], sep = ""))
-  if (tryCatch(!is.null(crop(MODISraster,shape)), error=function(e) return(FALSE))){ # cuando no hay superposicion, no corre
+                 substring(id[i],18,23), sep = ".")
+  archivo_name <- paste("/home/usuario/Sol/aire_comunitat/MODIS/crop/", 
+                        substring(id[i], 1, 9), fecha, ".tif", sep = "")  #seteo nombre de guardado
+  MODISraster <- raster(paste("/home/usuario/Sol/aire_comunitat/MODIS/quality/", id[i], sep = ""))
+  if (tryCatch(!is.null(crop(MODISraster,shape)), error = function(e) return(FALSE))){ # cuando no hay superposicion, no corre
     data_recorte <- crop(MODISraster, shape)  #recorto imagen para Valencia
     writeRaster(data_recorte, 
                 format = "GTiff",
@@ -83,20 +72,20 @@ for (i in 1:length(id)){
 
 # # # # # # # # # # # # # # # # # # # # # # # # #
 
-#### 2 - Calibracion    ####
+#### 2 - Calibracion    #### 
 
 # # # # # # # # # # # # # # # # # # # # # # # # #
 
 
 
 
-fs <- list.files(path="C:\\Users\\narep\\Desktop\\SOL\\aire_comunitat\\MODIS\\crop\\", 
+fs <- list.files(path = "/home/usuario/Sol/aire_comunitat/MODIS/crop/", 
                  pattern = "tif", full.names = TRUE)
 
 for (i in 1:length(fs)){
-  archivo_name <- paste("C:\\Users\\narep\\Desktop\\SOL\\aire_comunitat\\MODIS\\crop_cal\\",
-                        substring(fs[i],54,83), sep="")   #seteo nombre de guardado
-  crop <- raster(fs[i], values=TRUE)
+  archivo_name <- paste("/home/usuario/Sol/aire_comunitat/MODIS/crop_cal/",
+                        substring(fs[i], 46, 83), sep="")   #seteo nombre de guardado
+  crop <- raster(fs[i], values = TRUE)
   crop_cal <- (0.84927256*(crop)) + 0.01178339   #calibracion (ver AC_3_bis.R)
   writeRaster(crop_cal, 
               filename = archivo_name, 
@@ -111,7 +100,7 @@ for (i in 1:length(fs)){
 
 # # # # # # # # # # # # # # # # # # # # # # # # #
 
-#### 3 - Resampling   ####
+#### 3 - Resampling   #### >>>>>>>>>> desde aca!!
 
 # Es necesario hacerlo para igualar la extensión de todas las imagenes y poder hacer el stack
 
@@ -119,7 +108,7 @@ for (i in 1:length(fs)){
 
 
 
-fs <- list.files(path = "C:\\Users\\narep\\Desktop\\SOL\\aire_comunitat\\MODIS\\crop_cal\\", 
+fs <- list.files(path = "/home/usuario/Sol/aire_comunitat/MODIS/crop_cal/", 
                  pattern = ".tif", full.names = TRUE)
 
 extension <- data.frame()
@@ -153,11 +142,11 @@ s <- raster(e, nrows = nrow, ncols = ncol, crs= crs_project ) #raster con 3 vece
 
 
 for (i in 1:length(fs)){
-  archivo_name <- paste("C:\\Users\\narep\\Desktop\\SOL\\aire_comunitat\\MODIS\\crop_res\\",
-                        substring(fs[i],58,87), sep="")   #seteo nombre de guardado
+  archivo_name <- paste("/home/usuario/Sol/aire_comunitat/MODIS/crop_res/",
+                        substring(fs[i], nchar(fs[i])-29, nchar(fs[i])), sep="")   #seteo nombre de guardado
   crop <- raster(fs[i], values=TRUE)
   if(!all(is.na(crop[]))){
-    r1<- resample(crop, s, method = "ngb")
+    r1<- raster::resample(crop, s, method = "ngb")
     writeRaster(r1, 
                 filename = archivo_name,
                 format = "GTiff",
