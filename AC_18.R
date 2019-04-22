@@ -7,7 +7,7 @@ library(rgdal)
 library(rgeos)
 library(GISTools)
 library(lubridate)
-
+library(maptools)
 
 ## Objetivo: Generar base de FIRE
 
@@ -15,21 +15,22 @@ library(lubridate)
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
 
 # 1)  Abrir files
-fs <- list.files(path="C:\\Users\\narep\\Desktop\\SOL\\aire_comunitat\\variables\\FIRE", pattern = ".shp", full.names = TRUE)
+fs <- list.files(path="/home/usuario/Sol/aire_comunitat/variables/FIRE", pattern = ".shp", full.names = TRUE)
 
 file <- fs[1]  #solo con mediciones MODIS (facilita la integracion de datos)
 
 # 2) Shape recorte
 
-valencia <- readOGR("C:\\Users\\narep\\Desktop\\SOL\\AQ-Valencia\\mapa\\valencia.shp") #"+proj=longlat +ellps=GRS80 +no_defs "
-valencia <- spTransform(valencia, CRS("+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0 "))
+crs_project = "+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0"
+valencia <- readShapePoly("/home/usuario/Sol/aire_comunitat/mapa/valencia_4326.shp",
+                       proj4string = CRS(crs_project))
 
 ## 3)  Armar matriz de RASTER 
 # Uso imagen MODIS MCD19A2 como modelo
-MCD19A2 <- raster("C:\\Users\\narep\\Desktop\\SOL\\aire_comunitat\\MODIS\\crop_res\\MCD19A2.A2008-01-01.h17v04.tif")
+MCD19A2 <- raster("/home/usuario/Sol/aire_comunitat/stack/month/AOD_mes_01_max.tif")
 
 raster_template <- raster(nrows = 239, ncols = 158, #mantengo resolucion de 1km
-                          crs = "+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0 ", 
+                          crs = crs_project, 
                           ext = extent(MCD19A2))  # toma las extensiones
 
 
@@ -65,7 +66,13 @@ for( i in 2008:2018){
       #plot(rst, col= "black")
       recalc <- c(0, 0, 0, 0.001, Inf , 1)  # reclasificar >> son col: c[,1] = from; c[,2] = to; c[,3] = becomes 
       rst <- reclassify(rst, recalc)
-      writeRaster(rst, paste("C:\\Users\\narep\\Desktop\\SOL\\aire_comunitat\\variables\\FIRE\\mes\\fire_mes_", i,"-",j,".tif", sep = ""), format = "GTiff")
+      fecha <- paste(i, j, "01", sep = " ")
+      fecha <- as.Date(fecha, format = "%Y %m %d")
+      fecha <- format(fecha, format = "%Y-%j")
+      writeRaster(rst, 
+                  paste("/home/usuario/Sol/aire_comunitat/variables/FIRE/mes/fire-mes-",
+                        fecha,".tif", sep = ""), 
+                  format = "GTiff")
     }
  }
 }
@@ -93,7 +100,10 @@ for( i in 2008:2018){
         #plot(rst, col= "black")
         recalc <- c(0, 0, 0, 0.001, Inf , 1)  # reclasificar >> son col: c[,1] = from; c[,2] = to; c[,3] = becomes 
         rst <- reclassify(rst, recalc)
-        writeRaster(rst, paste("C:\\Users\\narep\\Desktop\\SOL\\aire_comunitat\\variables\\FIRE\\diario\\fire_", i,"-",j,"-", k, ".tif", sep = ""), format = "GTiff")
+        fecha <- paste(i, j, k, sep = " ")
+        fecha <- as.Date(fecha, format = "%Y %m %d")
+        fecha <- format(fecha, format = "%Y-%j")
+        writeRaster(rst, paste("/home/usuario/Sol/aire_comunitat/variables/FIRE/diario/fire-", fecha, ".tif", sep = ""), format = "GTiff")
 
       }
     }

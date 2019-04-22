@@ -25,20 +25,22 @@ crs_project = "+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0"
 # Uso imagen del STACK de MODIS MCD19A2 como modelo para crear raster
 # tomo el stack porq tiene el tamaño que me interesa conservar
 
-MODIS <- raster("C:\\Users\\narep\\Desktop\\SOL\\aire_comunitat\\stack\\month\\raster_mes_1_max.tif")
+MODIS <- raster("/home/usuario/Sol/aire_comunitat/stack/month/AOD_mes_01_max.tif")
 
 raster_template <- raster(nrows = 239, ncols = 158, #100m de resolucion aprox
                           crs = crs_project, 
                           ext = extent(MODIS))  # toma las extensiones
 
-
-id_aq <- dir("C:\\Users\\narep\\Desktop\\SOL\\aire_comunitat\\variables\\NDVI\\quality", pattern = ".tif") # atencion q no haya .tif.xml en la carpeta..
-id <- dir("C:\\Users\\narep\\Desktop\\SOL\\aire_comunitat\\variables\\NDVI\\raster", pattern = ".tif")
+dir_quality = "/home/usuario/Sol/aire_comunitat/variables/NDVI/quality"
+dir_raster = "/home/usuario/Sol/aire_comunitat/variables/NDVI/raster"
+  
+id_aq <- dir(dir_quality, pattern = ".tif") # atencion q no haya .tif.xml en la carpeta..
+id <- dir(dir_raster, pattern = ".tif")
 
 
 ## Cambiar sistema de referencia del shape
 
-shape <- readShapePoly("C:\\Users\\narep\\Desktop\\SOL\\aire_comunitat\\mapa\\valencia_4326.shp",
+shape <- readShapePoly("/home/usuario/Sol/aire_comunitat/mapa/valencia_4326.shp",
                        proj4string = CRS(crs_project))
 
 #shape_trans@bbox
@@ -46,7 +48,7 @@ shape <- readShapePoly("C:\\Users\\narep\\Desktop\\SOL\\aire_comunitat\\mapa\\va
 
 for (i in 1:length(id_aq)){
   # 1) Abrir imagen calidad de NDVI
-  raster_aq <- raster(paste("C:\\Users\\narep\\Desktop\\SOL\\aire_comunitat\\variables\\NDVI\\quality\\", id_aq[i], sep = ""))
+  raster_aq <- raster(paste(dir_quality, "/",id_aq[i], sep = ""))
 
   #range(raster_aq[raster_aq]) #ver rango de valores
   
@@ -61,7 +63,7 @@ for (i in 1:length(id_aq)){
   # plot(raster_aq)
   
   # 2) Abrir raster de NDVI
-  MODISraster <- raster(paste("C:\\Users\\narep\\Desktop\\SOL\\aire_comunitat\\variables\\NDVI\\raster\\", id[i], sep = ""))
+  MODISraster <- raster(paste(dir_raster, "/", id[i], sep = ""))
 
   MODISraster <- MODISraster*0.0001   #factor de escala 
   # plot(MODISraster)
@@ -70,23 +72,14 @@ for (i in 1:length(id_aq)){
   MODISraster <- mask(MODISraster, raster_aq)
   # plot(salida)
   
-  # 4)Recortar para no reproyectar todo el mapa
-  MODISraster <- crop(MODISraster, extent(-140000, 80000, 4100000 , 4600000 ))  #recorto imagen para Valencia
-  
-  
-  # 5) Reproyectar 
-  MODISraster  <- projectRaster(MODISraster, 
-                                 crs = crs_project,
-                                 method = "bilinear")
+  # 6) Resampling
+  data_resampling <- raster::resample(MODISraster, raster_template)
   
   # 4) Recortar
-  data_recorte <- crop(MODISraster, extent(-1.528134, 0.6885787, 37.845206, 37.845206))  #recorto imagen para Valencia
-  
-   # 6) Resampling
-  data_resampling <- raster::resample(data_recorte, raster_template)
+  data_recorte <- crop(data_resampling, extent(-1.532917, 0.6930792, 37.84875, 40.79145 ))  #recorto imagen para Valencia
   
   # 7) Guardar
-  writeRaster(data_resampling, paste("C:\\Users\\narep\\Desktop\\SOL\\aire_comunitat\\variables\\NDVI\\crop_res\\", id[i], sep = ""), 
+  writeRaster(data_recorte, paste("/home/usuario/Sol/aire_comunitat/variables/NDVI/crop_res/", id[i], sep = ""), 
               format = "GTiff", 
               overwrite = TRUE)
   rm(data_recorte, data_resampling, raster_aq, MODISraster)
@@ -102,7 +95,7 @@ for (i in 1:length(id_aq)){
 # # # # # # # # # # # # # # # # # # # # # # # # #
 
 
-fs <- list.files(path="C:\\Users\\narep\\Desktop\\SOL\\aire_comunitat\\variables\\NDVI\\crop_res\\", pattern = "tif", full.names = TRUE)
+fs <- list.files(path="/home/usuario/Sol/aire_comunitat/variables/NDVI/crop_res/", pattern = "tif", full.names = TRUE)
 
 
 
@@ -111,7 +104,7 @@ l <- list()
 
 for (j in 2008:2018){
   for (i in 1:length(fs)){
-    year <- as.numeric(substring(fs[i], 76, 79))
+    year <- as.numeric(substring(fs[i], nchar(fs[i])-91, nchar(fs[i])-88))
     if (year == j){
       l[[k]] <- fs[i]
       k <- k + 1
@@ -121,19 +114,19 @@ for (j in 2008:2018){
   min_s <- min(s, na.rm=TRUE)  
   max_s <- max(s, na.rm=TRUE)
   mean_s <- calc(s, fun=mean, na.rm=TRUE)
-  median_s <- calc(s, fun = median, na.rm = TRUE)
-  sd_s <- calc(s, fun = sd, na.rm=TRUE)
+  #median_s <- calc(s, fun = median, na.rm = TRUE)
+  #sd_s <- calc(s, fun = sd, na.rm=TRUE)
   
   
   fun <- function(x) { sum(!is.na(x)) }
   n_s <- calc(s, fun = fun )
   
-  writeRaster(min_s, filename = paste("raster_year_", j, "_min.tif", sep=""))
-  writeRaster(max_s, filename = paste("raster_year_", j, "_max.tif", sep=""))
-  writeRaster(mean_s, filename = paste("raster_year_", j, "_mean.tif", sep=""))
-  writeRaster(median_s, filename = paste("raster_year_", j, "_median.tif", sep=""))
-  writeRaster(sd_s, filename = paste("raster_year_", j, "_sd.tif", sep=""))
-  writeRaster(n_s, filename = paste("raster_year_", j, "_n.tif", sep=""))
+  writeRaster(min_s, filename = paste("NDVI_year_", j, "_min.tif", sep=""))
+  writeRaster(max_s, filename = paste("NDVI_year_", j, "_max.tif", sep=""))
+  writeRaster(mean_s, filename = paste("NDVI_year_", j, "_mean.tif", sep=""))
+  #writeRaster(median_s, filename = paste("NDVI_year_", j, "_median.tif", sep=""))
+  #writeRaster(sd_s, filename = paste("NDVI_year_", j, "_sd.tif", sep=""))
+  writeRaster(n_s, filename = paste("NDVI_year_", j, "_n.tif", sep=""))
   
   print(j)
   print(Sys.time())
@@ -148,14 +141,16 @@ for (j in 2008:2018){
 
 
 
-fs <- list.files(path="C:\\Users\\narep\\Desktop\\SOL\\aire_comunitat\\variables\\NDVI\\crop_res\\", pattern = "tif", full.names = TRUE)
+fs <- list.files(path="/home/usuario/Sol/aire_comunitat/variables/NDVI/crop_res/", pattern = "tif", full.names = TRUE)
 
 
 for (j in 1:12){
   l <- list()
   k = 1
   for (i in 1:length(fs)){
-    month <- as.Date(paste(substring(fs[i],80,82), substring(fs[i],76,79)), '%j %Y')
+    month <- as.Date(paste(substring(fs[i], nchar(fs[i])-87, nchar(fs[i])-85), 
+                           substring(fs[i], nchar(fs[i])-91, nchar(fs[i])-88)), 
+                           '%j %Y')
     month <- substr(as.character(month), 6,7)
     month <- as.numeric(month)
     if (j == month){
@@ -166,20 +161,20 @@ for (j in 1:12){
   s <- raster::brick(l)
   min_s <- min(s, na.rm=TRUE)  
   max_s <- max(s, na.rm=TRUE)
-  median_s <- calc(s, fun = median, na.rm = TRUE)
+  #median_s <- calc(s, fun = median, na.rm = TRUE)
   mean_s <- calc(s, fun = mean, na.rm=TRUE)
-  sd_s <- calc(s, fun = sd, na.rm=TRUE)
+  #sd_s <- calc(s, fun = sd, na.rm=TRUE)
   
   fun <- function(x) { sum(!is.na(x)) }
   n_s <- calc(s, fun = fun )
   
   
-  writeRaster(min_s, filename = paste("raster_mes_", j, "_min.tif", sep=""))
-  writeRaster(max_s, filename = paste("raster_mes_", j, "_max.tif", sep=""))
-  writeRaster(median_s, filename = paste("raster_mes_", j,  "_median.tif", sep=""))
-  writeRaster(mean_s, filename = paste("raster_mes_", j,  "_mean.tif", sep=""))
-  writeRaster(sd_s, filename = paste("raster_mes_", j,  "_sd.tif", sep=""))
-  writeRaster(n_s, filename = paste("raster_mes_", j, "_n.tif", sep=""))
+  writeRaster(min_s, filename = paste("NDVI_mes_", j, "_min.tif", sep=""))
+  writeRaster(max_s, filename = paste("NDVI_mes_", j, "_max.tif", sep=""))
+  #writeRaster(median_s, filename = paste("NDVI_mes_", j,  "_median.tif", sep=""))
+  writeRaster(mean_s, filename = paste("NDVI_mes_", j,  "_mean.tif", sep=""))
+  #writeRaster(sd_s, filename = paste("NDVI_mes_", j,  "_sd.tif", sep=""))
+  writeRaster(n_s, filename = paste("NDVI_mes_", j, "_n.tif", sep=""))
   
   rm(l,i,k)
   print(j)
@@ -195,8 +190,8 @@ for (j in 1:12){
 
 # # # # # # # # # # # # # # # # # # # # # # # # #
 
-antes <- "C:\\Users\\narep\\Desktop\\SOL\\aire_comunitat\\variables\\NDVI\\crop_res\\MOD13A3.A2008153.mosaic.006.2019039161047.psmc_000501302431.1_km_monthly_NDVI-1_km_monthly_NDVI.tif"
-despues <- "C:\\Users\\narep\\Desktop\\SOL\\aire_comunitat\\variables\\NDVI\\crop_res\\MOD13A3.A2018152.mosaic.006.2019039135237.psmc_000501302344.1_km_monthly_NDVI-1_km_monthly_NDVI.tif"
+antes <- "/home/usuario/Sol/aire_comunitat/variables/NDVI/crop_res/MOD13A3.A2008153.mosaic.006.2019088172506.psmcrp_000501319505.1_km_monthly_NDVI-1_km_monthly_NDVI.tif"
+despues <- "/home/usuario/Sol/aire_comunitat/variables/NDVI/crop_res/MOD13A3.A2018152.mosaic.006.2019088172710.psmcrp_000501319514.1_km_monthly_NDVI-1_km_monthly_NDVI.tif"
                       
 antes <- raster(antes)
 despues <- raster(despues)
