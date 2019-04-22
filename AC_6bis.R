@@ -37,12 +37,8 @@ map <- get_map(location = c(lat = 39.508, lon = -0.418),
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # 
 
-"/home/usuario/Sol/aire_comunitat/stack/month/AOD_mes_12_mean.tif"
 
-id <- dir("/home/usuario/Sol/aire_comunitat/stack/month", 
-          pattern = ".tif")
-MODIS <- raster(paste("/home/usuario/Sol/aire_comunitat/stack/month/", 
-                      id[1], sep = ""))
+MODIS <- raster("/home/usuario/Sol/aire_comunitat/stack/month/AOD_mes_01_max.tif")
 
 
 ## Opcion A ###
@@ -66,7 +62,7 @@ gg <- g +
   coord_equal()
 
 
-## Agregar NDVI
+## Agregar NDVI ####
 
 NDVI <- raster("/home/usuario/Sol/aire_comunitat/variables/NDVI/crop_res/MOD13A3.A2008001.mosaic.006.2019039161045.psmc_000501302431.1_km_monthly_NDVI-1_km_monthly_NDVI.tif")
 
@@ -89,4 +85,18 @@ ggg <- gg +
                       aes(x = x, y = y, fill = ndvi), alpha=.8) 
 
 
+## Agregar MERRA ####
+
+MERRA <- raster("/media/usuario/Elements SE/MERRA/raster_res/MERRA2_300.inst3_3d_asm_Np.20080101.PS.tif")
+
+merra.spdf <- as(MERRA, "SpatialPixelsDataFrame")
+merra.df <- as.data.frame(merra.spdf)
+names(merra.df)[1]<- "merra"
+head(merra.df)
+
+# ¿Como se ve MERRA sobre el mapa?
+mg <- g + 
+  geom_tile(data = merra.df, 
+            aes(x= x, y= y, fill = merra), alpha=.8) + 
+  coord_equal()
 
