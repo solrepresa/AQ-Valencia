@@ -121,14 +121,13 @@ id <- list.files(path = getwd(),
 ## Shape recorte
 
 crs_project = "+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0"
-shape <- readShapePoly("/home/usuario/Sol/aire_comunitat/mapa/valencia_4326.shp",
+shape <- readShapePoly("mapa/valencia_4326.shp",
                        proj4string = CRS(crs_project))
 
 
 # Para resampling
 # Uso imagen MODIS MCD19A2 como modelo para crear raster
 MODIS <- raster("/home/usuario/Sol/aire_comunitat/stack/month/AOD_mes_01_max.tif")
-
 
 raster_template <- raster(nrows = 239, ncols = 158, #100m de resolucion aprox
                           crs = crs_project, 

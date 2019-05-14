@@ -22,12 +22,10 @@ library(raster)
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # 
 
-fs <- dir("C:\\Users\\narep\\Desktop\\SOL\\aire_comunitat\\variables\\DEM", pattern = ".tif") # atencion q no haya .tif.xml en la carpeta..
-
-dem_1 <- raster(paste("C:\\Users\\narep\\Desktop\\SOL\\aire_comunitat\\variables\\DEM\\", fs[1], sep = ""))
-dem_2 <- raster(paste("C:\\Users\\narep\\Desktop\\SOL\\aire_comunitat\\variables\\DEM\\", fs[2], sep = ""))
-dem_3 <- raster(paste("C:\\Users\\narep\\Desktop\\SOL\\aire_comunitat\\variables\\DEM\\", fs[3], sep = ""))
-dem_4 <- raster(paste("C:\\Users\\narep\\Desktop\\SOL\\aire_comunitat\\variables\\DEM\\", fs[4], sep = ""))
+dem_1 <- raster("variables/DEM/srtm_36_04.tif")
+dem_2 <- raster("variables/DEM/srtm_36_05.tif")
+dem_3 <- raster("variables/DEM/srtm_37_04.tif")
+dem_4 <- raster("variables/DEM/srtm_37_05.tif")
 
 
 #mosaic(dem_1, dem_2)   # funcion para armar mosaicos
@@ -44,10 +42,10 @@ plot(mosaico)
 
 ## 2 - Recortar mosaico  
 
-
+crs_project <- "+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0 "
 
 ## Shape
-shape <- readShapePoly("C:\\Users\\narep\\Desktop\\SOL\\aire_comunitat\\mapa\\valencia_4326.shp",
+shape <- readShapePoly("mapa/valencia_4326.shp",
                        proj4string = CRS(crs_project))
 
 
@@ -56,14 +54,17 @@ data_recorte <- crop(mosaico, shape)  #recorto imagen para Valencia
 
 
 # Resampling >> Uso imagen MODIS MCD19A2 como modelo para crear raster
-MCD19A2 <- raster("C:\\Users\\narep\\Desktop\\SOL\\aire_comunitat\\MODIS\\crop_res\\MCD19A2.A2008-01-01.h17v04.tif")
+MCD19A2  <- raster("stack/month/AOD_mes_01_max.tif")
 
-raster_template <- raster(nrows = 239*10, ncols = 158*10, 
-                          crs = "+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0 ", 
+raster_template <- raster(nrows = 239, ncols = 158, 
+                          crs = crs_project , 
                           ext = extent(MCD19A2))  # toma las extensiones
 
 data_resampling <- raster::resample(data_recorte, raster_template)
 
 
 # Guardar
-writeRaster(data_resampling , "C:\\Users\\narep\\Desktop\\SOL\\aire_comunitat\\variables\\DEM\\DEM.tif", format = "GTiff")
+writeRaster(data_resampling , 
+            "variables/DEM/DEM.tif", 
+            format = "GTiff",
+            overwrite = TRUE)
