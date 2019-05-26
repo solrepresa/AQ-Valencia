@@ -35,14 +35,15 @@ sitios <- sitios[order(sitios$Codigo),]
 #proj4string(points) <- CRS("+proj=longlat +ellps=WGS84 +no_defs") # Asignar proyeccion
 #slot(points, "data") <- data.frame(Id = points@data$codigo, Nombre = points@data$Estacion) # Asigno variables de inter?s (o quito el resto)
 
-register_google(key = "AIzaSyDL10fYmvbe1w0E8y2tfGF6fcDO5x7osBQ")
+key = "completar ACA"
+register_google(key = key)
 
 
 ## Mapa de lo puntos de calidad del aire 
 
 map <- get_map(location = c(lat = 39.508, lon = -0.418), 
                maptype ="roadmap", 
-               api_key = "AIzaSyDL10fYmvbe1w0E8y2tfGF6fcDO5x7osBQ")
+               api_key = key)
 
 ggmap(map) + 
   geom_point(aes(x=Longitud, y=Latitud, colour=Codigo), 
