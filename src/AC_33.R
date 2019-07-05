@@ -19,7 +19,7 @@ library(caret)
 
 # # # # # # # # # # # # # # # # # # # # # # # # #
 
-# 1- Obtener puntos de raster
+# 1- IDW
 
 # # # # # # # # # # # # # # # # # # # # # # # # #
 
