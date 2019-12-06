@@ -3,7 +3,7 @@
 # 20/11/2018
 
 # Objetivo: 
-# Generar lista desde la base de datos con los contmainantes de interes y todas las estaciones
+# Generar lista desde la base de datos con los contaminantes de interes y todas las estaciones
 
 
 library(sqldf)
