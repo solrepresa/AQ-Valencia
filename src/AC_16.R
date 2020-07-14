@@ -28,7 +28,7 @@ library(maptools)
 #  en ese caso utilizar el código que está más abajo :)
 
 
-setwd("/media/usuario/Elements SE/MERRA") #fundamental para q funcione gdal!
+setwd("/media/usuario/Elements SE/MERRA/inst_3d_asm_Nv") #fundamental para q funcione gdal!
 #id <- dir(pattern = ".hdf") 
 
 id <- list.files(path = getwd(),

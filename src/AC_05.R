@@ -51,21 +51,21 @@ shape <- readShapePoly("/home/usuario/Sol/aire_comunitat/mapa/valencia_4326.shp"
                        proj4string = CRS(crs_project))
 
 
-for (i in 1:length(id)){
-  fecha <- paste(as.Date(paste(substring(id[i],14,16), substring(id[i],10,13)), '%j %Y'), 
-                 substring(id[i],18,23), sep = ".")
-  archivo_name <- paste("/home/usuario/Sol/aire_comunitat/MODIS/crop/", 
-                        substring(id[i], 1, 9), fecha, ".tif", sep = "")  #seteo nombre de guardado
-  MODISraster <- raster(paste("/home/usuario/Sol/aire_comunitat/MODIS/quality/", id[i], sep = ""))
-  if (tryCatch(!is.null(crop(MODISraster,shape)), error = function(e) return(FALSE))){ # cuando no hay superposicion, no corre
-    data_recorte <- crop(MODISraster, shape)  #recorto imagen para Valencia
-    writeRaster(data_recorte, 
-                format = "GTiff",
-                filename = archivo_name, 
-                overwrite = TRUE) # Guardo imagen
-    print(i)
+  for (i in 1:length(id)){
+    fecha <- paste(as.Date(paste(substring(id[i],14,16), substring(id[i],10,13)), '%j %Y'), 
+                   substring(id[i],18,23), sep = ".")
+    archivo_name <- paste("/home/usuario/Sol/aire_comunitat/MODIS/crop/", 
+                          substring(id[i], 1, 9), fecha, ".tif", sep = "")  #seteo nombre de guardado
+    MODISraster <- raster(paste("/home/usuario/Sol/aire_comunitat/MODIS/quality/", id[i], sep = ""))
+    if (tryCatch(!is.null(crop(MODISraster,shape)), error = function(e) return(FALSE))){ # cuando no hay superposicion, no corre
+      data_recorte <- crop(MODISraster, shape)  #recorto imagen para Valencia
+      writeRaster(data_recorte, 
+                  format = "GTiff",
+                  filename = archivo_name, 
+                  overwrite = TRUE) # Guardo imagen
+      print(i)
+    }
   }
-}
 
 
 

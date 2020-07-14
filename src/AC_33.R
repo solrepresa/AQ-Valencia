@@ -50,15 +50,11 @@ kfold = 5 # numero de k-fold cross validation
 
 
 
-# Para mejorar la performance, paralelizar el proceso!
-cl <- makePSOCKcluster(3)
-registerDoParallel(cl) #registro del proceso paralelo
-
-for( i in 663:length(fs)){
+for( i in 707:2000){ #length(fs)
   print(i)
   raster_fs <- raster(paste(dir, fs[i], sep=""))
   filename <- paste("IDW-", fs[i], sep="")
-  raster_points <- as.data.frame(rasterToPoints(r))
+  raster_points <- as.data.frame(rasterToPoints(raster_fs))
   rm(raster_fs)
   
   if(nrow(raster_points) > 3776){  #### control: raster con un 10% de datos
@@ -70,6 +66,7 @@ for( i in 663:length(fs)){
     set.seed(513)  # 5-fold cross-validation
     
     kf <- kfold(nrow(raster_points), k = kfold)
+    
     rmse <- rep(NA, kfold)
     for (k in 1:kfold) {   
       test <- raster_points[kf == k, ]
@@ -97,14 +94,29 @@ for( i in 663:length(fs)){
                 format = "GTiff",
                 overwrite = TRUE)
     
-    rm(data_recorte, raster_template, train, test, idw.grid, kat.idw)
+    rm(data_recorte, raster_template, train, test, kat.idw)
     
   }
   
 }
 
-stopCluster(cl) #cerrar
-remove(cl)
-registerDoSEQ()
 
-write.csv(RMSE_IDW, "error_IDW_diarios_aod.csv" , row.names = FALSE)
+write.csv(RMSE_IDW, "error_IDW_diarios_aod_2.csv" , row.names = FALSE)
+
+
+# # # # # # # # # # # # # # # # # # # # # # # # #  # # # # # # # # # # # # # # # # # # # # # # # # #
+
+a <- read.csv("error_IDW_diarios_aod_1.csv")
+b <- read.csv("error_IDW_diarios_aod_2.csv")
+c <- read.csv("error_IDW_diarios_aod_3.csv")
+d <- read.csv("error_IDW_diarios_aod_4.csv")
+
+a <- rbind(a,d)
+write.csv(a, "error_IDW_diarios_aod_tot.csv" , row.names = FALSE)
+
+
+  mean(a$RMSE)  
+  #[1] 0.008876939
+  
+  sd(a$RMSE)
+  #[1] 0.003542968

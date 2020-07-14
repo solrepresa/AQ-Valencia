@@ -23,7 +23,7 @@ library(reshape2)
 
 # Los files procesados
 
-setwd("C:\\Users\\narep\\Desktop\\SOL\\aire_comunitat\\variables\\MERRA\\raster_res") 
+setwd("/media/usuario/Elements SE/MERRA/raster_res") 
 
 id <- list.files(path = getwd(),
                  pattern = "*.tif",
@@ -35,7 +35,6 @@ fecha <- substr(id, 28, 35)
 SDS <- substr(id, 37, nchar(id)-4)
 
 base_MERRA <- data.frame(archivo, fecha, SDS)
-
 base_MERRA$fecha <- as.Date(base_MERRA$fecha, format = "%Y%m%d", tz="GMT" )
 
 datos <- base_MERRA %>% group_by(archivo, fecha) %>% summarise()
@@ -49,7 +48,6 @@ fecha <- as.data.frame(seq.Date(as.Date(ISOdate(2008,01,01)), as.Date(ISOdate(20
 names(fecha) <- "fecha"
 
 missing_data <- merge(datos, fecha, by = "fecha", all = TRUE)
-
 
 
 ## Funcion de datos Missing  ####
@@ -89,11 +87,19 @@ ggplot(miss_data, aes(x = fecha, y = value)) +
   geom_bar(stat="identity") + 
   theme_bw() + ylab("") + 
   scale_y_continuous(breaks =  c(0, 1)) + 
-  theme(axis.text.y = element_text(colour="white")) +
+  theme(axis.text.y = element_text(colour = "white" )) +
   facet_wrap(~variable) + 
   ggtitle("Datos procesados")
 
 
+# para ver de a una variable
+miss_data %>% filter( variable == "inst3_3d_asm_Np") %>%
+  ggplot(aes(x = fecha, y = value)) + 
+  geom_bar(stat="identity") + 
+  theme_bw() + ylab("") + 
+  scale_y_continuous(breaks =  c(0, 1)) + 
+  theme(axis.text.y = element_text(colour="white")) +
+  ggtitle("Datos procesados")
 
 
 # # # # # # # # # # # # # # # # # # # # # # # # #
@@ -102,19 +108,98 @@ ggplot(miss_data, aes(x = fecha, y = value)) +
 
 # # # # # # # # # # # # # # # # # # # # # # # # #
 
-a <- miss_data %>% filter( value == "0")
+falta <- miss_data %>% filter( value == "0")
 
-a$value = 1
+falta$value = 1
 
-ggplot(a, aes( x = fecha, y = value)) + geom_point() +
+ggplot(falta, aes( x = fecha, y = value)) + geom_point() +
   theme(axis.text.y = element_text(colour="white")) +
   facet_wrap(~variable) + 
   ggtitle("Datos que faltan")
 
 
+falta %>% filter( variable == "inst3_3d_asm_Np") %>%
+  ggplot(aes(x = fecha, y = value)) + 
+  geom_bar(stat="identity") + 
+  theme_bw() + ylab("") + 
+  scale_y_continuous(breaks =  c(0, 1)) + 
+  theme(axis.text.y = element_text(colour="white")) +
+  ggtitle("Datos faltantes")
 
 
-prueba <- a %>% filter( variable == "tavg1_2d_slv_Nx")
+falta_var <- falta %>% filter( variable == "inst3_3d_asm_Np")
+
+
+
+
+
+# # # # # # # # # # # # # # # # # # # # # # # # #
+
+# Ver SDS faltantes 
+
+# # # # # # # # # # # # # # # # # # # # # # # # #
+
+
+sds_datos <- base_MERRA %>% group_by(SDS, fecha) %>% summarise()
+sds_datos <- as.data.frame(sds_datos)
+sds_datos <- dcast(sds_datos, fecha ~ SDS)
+
+
+missing_data_sds <- merge(sds_datos, fecha, by = "fecha", all =TRUE)
+
+# Ver los miss
+miss_data_sds <- miss(missing_data_sds, missing_data_sds$fecha)
+miss_data_sds <- melt(miss_data_sds, id.vars = "fecha")
+
+
+ggplot(miss_data_sds, aes(x = fecha, y = value)) + 
+  geom_bar(stat="identity") + 
+  theme_bw() + ylab("") + 
+  scale_y_continuous(breaks =  c(0, 1)) + 
+  theme(axis.text.y = element_text(colour="white")) +
+  facet_wrap(~variable) + 
+  ggtitle("Datos procesados")
+
+
+
+# # # # # # # # # # # # # # # # # # # # # # # # #
+
+#  Eliminar errores de la base de datos
+
+# # # # # # # # # # # # # # # # # # # # # # # # #
+
+
+## Eliminar los archivos de "inst3_3d_asm_Nv" que descargue por error
+files_rm <- list.files(path = getwd(),
+                 pattern = "inst3_3d_asm_Nv",
+                 full.names = FALSE)
+
+#file.remove(files_rm)
+
+
+# # # # # # # # # # # # # # # # # # # # # # # # #
+
+# Analizar variables para el modelo
+
+# # # # # # # # # # # # # # # # # # # # # # # # #
+
+# Quedarme solo con las variables de interes
+sds_lista <- base_MERRA %>% 
+  filter(SDS == "PS" | SDS == "RH" | SDS == "T" | SDS == "U" | SDS == "V" |
+           SDS == "BCSMASS" | SDS ==  "DMSSMASS" | SDS ==  "DUSMASS" | SDS ==  "SO4SMASS" |
+           SDS ==  "SSSMASS25" | SDS == "PRECTOT" | SDS ==  "SPEED" | SDS ==  "CLDHGH" |
+           SDS == "CLDLOW" | SDS ==  "H1000" )
+
+sds_lista$fecha <- as.factor(as.character(sds_lista$fecha))
+sds_lista$SDS <- as.character(sds_lista$SDS)
+
+# Agrupar por fecha para ver si tengo todos los archivos
+sds_lista <- sds_lista  %>% 
+  group_by(fecha) %>% summarise(n = n())
+
+# Tengo toda la base completa :D
+
+
 
 
 # # # # # # # # # # # # # # # # # # # # # # # # #
@@ -122,10 +207,11 @@ prueba <- a %>% filter( variable == "tavg1_2d_slv_Nx")
 # Variables de interes de MERRA
 
 SDS <- vector( mode = "list", length = 5)
-names(SDS) <- c("tavg1_2d_aer_Nx", "tavg1_2d_slv_Nx", "tavg1_2d_flx_Nx", "avg1_2d_rad_Nx", "inst3_3d_asm_Np") #"inst3_3d_asm_Nv"
+names(SDS) <- c("inst3_3d_asm_Np", "tavg1_2d_aer_Nx", "tavg1_2d_slv_Nx", "tavg1_2d_flx_Nx", "avg1_2d_rad_Nx" ) 
 
-SDS[[1]] <- c("BCSMASS", "DMSSMASS", "DUSMASS", "DUSMASS25", "OCSMASS", "SO2SMASS", "SO4SMASS", "SSSMASS", "SSSMASS25")
-SDS[[2]] <- "H1000" 
-SDS[[3]] <- c("PBLH" , "SPEED", "SPEEDMAX", "USTAR", "PRECTOT")
-SDS[[4]] <- c("ALBEDO", "CLDHGH", "CLDLOW")
-SDS[[5]] <- c("PS", "T", "RH", "U", "V")
+SDS[[1]] <- c("PS", "T", "RH", "U", "V")
+#"inst3_3d_asm_Nv"
+SDS[[2]] <- c("BCSMASS", "DMSSMASS", "DUSMASS", "DUSMASS25", "OCSMASS", "SO2SMASS", "SO4SMASS", "SSSMASS", "SSSMASS25")
+SDS[[3]] <- "H1000" 
+SDS[[4]] <- c("PBLH" , "SPEED", "SPEEDMAX", "USTAR", "PRECTOT")
+SDS[[5]] <- c("ALBEDO", "CLDHGH", "CLDLOW")
